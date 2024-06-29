@@ -112,10 +112,10 @@ import org.apache.hadoop.fs.s3native.S3xLoginHelper;
 import org.apache.hadoop.io.retry.RetryPolicies;
 import org.apache.hadoop.fs.store.EtagChecksum;
 import org.apache.hadoop.security.UserGroupInformation;
-import org.apache.hadoop.util.BlockingThreadPoolExecutorService;
+import org.apache.hadoop.util.BlockingThreadPoolExecutorServiceFixed;
 import org.apache.hadoop.util.Progressable;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.hadoop.util.SemaphoredDelegatingExecutor;
+import org.apache.hadoop.util.SemaphoredDelegatingExecutorFixed;
 
 import static org.apache.hadoop.fs.s3a.Constants.*;
 import static org.apache.hadoop.fs.s3a.Invoker.*;
@@ -282,7 +282,7 @@ public class S3AFileSystem extends FileSystem implements StreamCapabilities {
           MAX_TOTAL_TASKS, DEFAULT_MAX_TOTAL_TASKS, 1);
       long keepAliveTime = longOption(conf, KEEPALIVE_TIME,
           DEFAULT_KEEPALIVE_TIME, 0);
-      boundedThreadPool = BlockingThreadPoolExecutorService.newInstance(
+      boundedThreadPool = BlockingThreadPoolExecutorServiceFixed.newInstance(
           maxThreads,
           maxThreads + totalTasks,
           keepAliveTime, TimeUnit.SECONDS,
@@ -291,7 +291,7 @@ public class S3AFileSystem extends FileSystem implements StreamCapabilities {
           maxThreads, Integer.MAX_VALUE,
           keepAliveTime, TimeUnit.SECONDS,
           new LinkedBlockingQueue<Runnable>(),
-          BlockingThreadPoolExecutorService.newDaemonThreadFactory(
+          BlockingThreadPoolExecutorServiceFixed.newDaemonThreadFactory(
               "s3a-transfer-unbounded"));
 
       int listVersion = conf.getInt(LIST_VERSION, DEFAULT_LIST_VERSION);
@@ -769,7 +769,7 @@ public class S3AFileSystem extends FileSystem implements StreamCapabilities {
     return new FSDataOutputStream(
         new S3ABlockOutputStream(this,
             destKey,
-            new SemaphoredDelegatingExecutor(boundedThreadPool,
+            new SemaphoredDelegatingExecutorFixed(boundedThreadPool,
                 blockOutputActiveBlocks, true),
             progress,
             partSize,
