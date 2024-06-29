@@ -1,4 +1,5 @@
 hadoop-release
 ==============
 
-Public hadoop release repository
+Hortonworks Data Platform (HDP) hadoop release repository
+
